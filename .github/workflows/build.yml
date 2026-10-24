@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Step-level env is not visible to that step's `if`, so expose the secret at job level.
+      SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
     steps:
       - uses: actions/checkout@v4
       - uses: snapcore/action-build@v1
@@ -16,11 +19,17 @@ jobs:
         run: |
           sudo snap install --dangerous ${{ steps.build.outputs.snap }}
           micompress --help
-          printf 'hello hello hello hello hello\n%.0s' {1..200} > /tmp/sample.txt
-          cp /tmp/sample.txt "$HOME/sample.txt"
+          printf 'hello hello hello hello hello\n%.0s' {1..200} > "$HOME/sample.txt"
           micompress "$HOME/sample.txt" -o "$HOME/out" || true
-          ls -la "$HOME/out" || true
       - uses: actions/upload-artifact@v4
         with:
           name: snap
           path: ${{ steps.build.outputs.snap }}
+      # Runs only once the SNAPCRAFT_STORE_CREDENTIALS secret exists
+      # (create it with: snapcraft export-login --snaps=micompress --acls package_access,package_push,package_release -).
+      - name: Publish to the Snap Store
+        if: ${{ env.SNAPCRAFT_STORE_CREDENTIALS != '' }}
+        uses: snapcore/action-publish@v1
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: stable
