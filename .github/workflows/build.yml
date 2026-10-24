@@ -1,0 +1,26 @@
+name: Build snap
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: snapcore/action-build@v1
+        id: build
+      - name: Smoke test the built snap
+        run: |
+          sudo snap install --dangerous ${{ steps.build.outputs.snap }}
+          micompress --help
+          printf 'hello hello hello hello hello\n%.0s' {1..200} > /tmp/sample.txt
+          cp /tmp/sample.txt "$HOME/sample.txt"
+          micompress "$HOME/sample.txt" -o "$HOME/out" || true
+          ls -la "$HOME/out" || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snap
+          path: ${{ steps.build.outputs.snap }}

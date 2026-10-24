@@ -1,0 +1,40 @@
+name: micompress
+base: core24
+version: '0.1.1'
+summary: Compress images, PDFs, video, audio, documents & archives
+description: |
+  MiCompress compresses images, PDFs, video, audio, documents and archives from the
+  command line, powered by micompress.com. A tiny client that sends your file to the
+  MiCompress engine over HTTPS and writes back the optimized result.
+
+    micompress photo.jpg
+    micompress *.png --preset extreme
+    micompress report.pdf -o out/
+
+  More formats and a web UI at https://micompress.com
+website: https://micompress.com
+source-code: https://github.com/micompress/micompress-cli
+issues: https://github.com/micompress/micompress-cli/issues
+license: MIT
+grade: stable
+confinement: strict
+
+apps:
+  micompress:
+    command: bin/micompress
+    environment:
+      # Usage from the snap is reported as its own channel, not as npm.
+      MICOMPRESS_CHANNEL: snap
+    plugs:
+      - home
+      - network
+      - removable-media
+
+parts:
+  micompress:
+    plugin: npm
+    npm-include-node: true
+    npm-node-version: "22.12.0"
+    # The published npm CLI (extend/npm-cli), pinned to its release tag.
+    source: https://github.com/micompress/micompress-cli.git
+    source-tag: v0.1.1
