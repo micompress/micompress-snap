@@ -35,6 +35,6 @@ parts:
     plugin: npm
     npm-include-node: true
     npm-node-version: "22.12.0"
-    # The published npm CLI (extend/npm-cli), pinned to its release tag.
-    source: https://github.com/micompress/micompress-cli.git
-    source-tag: v0.1.1
+    # Vendored copy of the npm CLI (extend/npm-cli). Unlike the v0.1.1 npm release it honours
+    # MICOMPRESS_CHANNEL, so snap usage is attributed to the snap channel.
+    source: cli
